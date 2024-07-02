@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Post #{{.ID}}</title>
+</head>
+<body>
+    <h1>{{.Title}}</h1>
+    <br>
+    <br>
+    <p>{{.Content}}</p>
+
+    <a href="/posts">Return</a>
+
+    <form action="/posts/{{.ID}}" method="POST" style="display:inline;">
+        <input type="hidden" name="_method" value="DELETE">
+        <input type="submit" value="Delete?">
+    </form>
+</body>
+</html>
