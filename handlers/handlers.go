@@ -9,8 +9,47 @@ import (
 )
 
 func GetAllPosts(c echo.Context) error {
-	return c.String(http.StatusOK, "All Posts")
+    var posts []models.Post
+
+    rows, err := database.DB.Query("SELECT id, title, content FROM posts")
+    if err != nil {
+        log.Println("Error fetching posts: ", err)
+        return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error fetching posts"})
+    }
+    defer rows.Close()
+
+    for rows.Next() {
+        var post models.Post
+        if err := rows.Scan(&post.ID, &post.Title, &post.Content); err != nil {
+            log.Println("Error scanning post: ", err)
+            return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error scanning post"})
+        }
+        posts = append(posts, post)
+    }
+
+    if err = rows.Err(); err != nil {
+        log.Println("Rows error: ", err)
+        return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Rows error"})
+    }
+
+    if len(posts) == 0 {
+        log.Println("No posts found")
+        return c.JSON(http.StatusNotFound, echo.Map{"error": "No posts found"})
+    }
+
+    log.Printf("Rendering all posts: %+v", posts)
+
+    err = c.Render(http.StatusOK, "all_posts.html", map[string]interface{}{
+        "Posts": posts,
+    })
+    if err != nil {
+        log.Println("Error rendering template: ", err)
+        return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error rendering template"})
+    }
+
+    return nil
 }
+
 
 func GetPost(c echo.Context) error {
 	id := c.Param("id")
@@ -62,7 +101,7 @@ func CreatePost(c echo.Context) error {
 	newPost.ID = int(id)
 
 	log.Printf("Received post data: %+v", newPost) // confirm we received data
-	return c.String(http.StatusCreated, "Created New Post")
+	return c.Redirect(http.StatusSeeOther, "/posts")
 }
 
 func UpdatePost(c echo.Context) error {

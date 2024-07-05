@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogustine Writekower</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Merriweather', serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            padding: 40px 20px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-bottom: 2px solid #444;
+        }
+        header h1 {
+            margin: 0;
+            font-weight: 700;
+        }
+        .main-post {
+            display: flex;
+            margin: 40px 0;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .main-post img {
+            width: 50%;
+            height: auto;
+            margin-right: 20px;
+        }
+        .main-post div {
+            width: 50%;
+        }
+        .main-post h2 {
+            margin-top: 0;
+            font-weight: 700;
+            color: #333;
+        }
+        .posts {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+        .post {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .post:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .post div {
+            width: 70%;
+        }
+        .post img {
+            width: 150px;
+            height: auto;
+            margin-left: 20px;
+            width: 30%;
+        }
+        .post h2 {
+            margin: 0;
+            font-weight: 700;
+            color: #333;
+        }
+        .post p {
+            color: #555;
+        }
+        .post a {
+            text-decoration: none;
+            color: #1E90FF;
+        }
+        .post a:hover {
+            color: #4169E1;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: #fff;
+            border-top: 2px solid #444;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Blogustine Writekower</h1>
+    </header>
+    <div class="container">
+        {{ if gt (len .Posts) 0 }}
+        <a href="/posts/{{ (index .Posts 0).ID }}">
+            <div class="main-post">
+                <img src="https://i.imgur.com/OafhcWl.png" alt="{{ (index .Posts 0).Title }}">
+                <div>
+                    <h2>{{ (index .Posts 0).Title }}</h2>
+                    <p>{{ (index .Posts 0).Content }}</p>
+                </div>
+            </div>
+        </a>
+        <div class="posts">
+            {{ range $index, $post := .Posts }}
+            {{ if gt $index 0 }}
+            <a href="/posts/{{ $post.ID }}" class="post">
+                <div>
+                    <h2>{{ $post.Title }}</h2>
+                    <p>{{ $post.Content }}</p>
+                </div>
+                <img src="https://i.imgur.com/OafhcWl.png" alt="{{ $post.Title }}">
+            </a>
+            {{ end }}
+            {{ end }}
+        </div>
+        {{ else }}
+        <p>No posts available</p>
+        {{ end }}
+    </div>
+    <footer>
+        <p>&copy; Augblog</p>
+    </footer>
+</body>
+</html>

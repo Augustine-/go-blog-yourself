@@ -6,6 +6,8 @@ import (
 	"blog/renderer"
 )
 
+
+
 func main() {
 	database.InitDB()
 
