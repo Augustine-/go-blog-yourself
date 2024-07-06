@@ -10,6 +10,8 @@ import (
 func New() *echo.Echo {
     e := echo.New()
 
+    e.Static("/static", "static")
+
     e.Pre(middleware.RemoveTrailingSlash())
 
     // Public routes

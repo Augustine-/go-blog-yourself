@@ -3,6 +3,7 @@ package database
 import(
 	"database/sql"
 	"log"
+	"blog/models"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -23,7 +24,8 @@ func createTable() {
 	createPostTableSQL := `CREATE TABLE IF NOT EXISTS posts (
 		"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		"title" TEXT NOT NULL,
-		"content" text nnot null
+		"content" TEXT NOT NULL,
+		"image_url" TEXT
 	);`
 
 	statement, err := DB.Prepare(createPostTableSQL)
@@ -32,4 +34,25 @@ func createTable() {
 	}
 
 	statement.Exec()
+}
+
+func SavePostToDB(post models.Post) error {
+	statement, err := DB.Prepare("INSERT INTO posts (title, content, image_url) VALUES (?, ? ,?)")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	result, err := statement.Exec(post.Title, post.Content, post.ImageURL)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	post.ID = int(id)
+	return nil
 }
