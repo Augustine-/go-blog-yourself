@@ -9,11 +9,16 @@ import (
 
 
 func main() {
-	database.InitDB()
+    database.InitDB()
 
-	e := router.New()
+    e := router.New()
 
-	e.Renderer = renderer.NewRenderer()
+    e.Renderer = renderer.NewRenderer()
 
-	e.Logger.Fatal(e.Start(":1323"))
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "1323" // Default to 1323 if PORT is not set
+    }
+
+    e.Logger.Fatal(e.Start(":" + port))
 }
