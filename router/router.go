@@ -20,6 +20,7 @@ func New() *echo.Echo {
     }))
 
     // Public routes
+    e.GET("/", handlers.GetAllPosts)
     e.GET("/posts", handlers.GetAllPosts)
     e.GET("/posts/:id", handlers.GetPost)
 
