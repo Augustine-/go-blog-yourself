@@ -9,6 +9,7 @@ import (
 	"os"
 	"io"
 	"path/filepath"
+	"strconv"
 )
 
 func GetAllPosts(c echo.Context) error {
@@ -108,12 +109,64 @@ func CreatePost(c echo.Context) error {
 	}
 	return c.Redirect(http.StatusSeeOther, "/posts")
 }
-
 func UpdatePost(c echo.Context) error {
-	id := c.Param("id")
+    idStr := c.Param("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        log.Println("Invalid post ID:", err)
+        return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid post ID"})
+    }
 
-	return c.String(http.StatusOK, "Updated Post "+id)
+    var updatedPost models.Post
+    updatedPost.ID = id
+    updatedPost.Title = c.FormValue("title")
+    updatedPost.Content = c.FormValue("content")
+
+    file, err := c.FormFile("image")
+    if err == nil {
+        src, err := file.Open()
+        if err != nil {
+            log.Println("Error opening file:", err)
+            return c.JSON(http.StatusBadRequest, echo.Map{"error": "Failed to open image"})
+        }
+        defer src.Close()
+
+        dstPath := filepath.Join("static/images", file.Filename)
+        dst, err := os.Create(dstPath)
+        if err != nil {
+            log.Println("Error creating destination file:", err)
+            return c.JSON(http.StatusBadRequest, echo.Map{"error": "Failed to create destination file"})
+        }
+        defer dst.Close()
+
+        if _, err = io.Copy(dst, src); err != nil {
+            log.Println("Error copying file:", err)
+            return c.JSON(http.StatusBadRequest, echo.Map{"error": "Failed to copy file"})
+        }
+
+        updatedPost.ImageURL = "/static/images/" + file.Filename
+    } else if err == http.ErrMissingFile {
+        // Retrieve the current image URL from the database
+        row := database.DB.QueryRow("SELECT image_url FROM posts WHERE id = ?", id)
+        err = row.Scan(&updatedPost.ImageURL)
+        if err != nil {
+            log.Println("Error fetching current image URL:", err)
+            return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to retrieve current image URL"})
+        }
+    } else {
+        log.Println("Error retrieving file:", err)
+        return c.JSON(http.StatusBadRequest, echo.Map{"error": "Failed to retrieve image"})
+    }
+
+    if err := database.UpdatePostInDB(updatedPost); err != nil {
+        log.Println("Error updating post:", err)
+        return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to update post"})
+    }
+
+    return c.Redirect(http.StatusSeeOther, "/posts/" + idStr)
 }
+
+
 
 func DeletePost(c echo.Context) error {
 	id := c.Param("id")
@@ -136,4 +189,25 @@ func DeletePost(c echo.Context) error {
 
 func NewPostForm(c echo.Context) error {
 	return c.Render(http.StatusOK, "new_post.html", nil)
+}
+
+func EditPostForm(c echo.Context) error {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+        log.Println("Invalid post ID:", err)
+        return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid post ID"})
+    }
+
+	var post models.Post
+
+	row := database.DB.QueryRow("SELECT id, title, content, image_url FROM posts WHERE id = ?", id)
+	err = row.Scan(&post.ID, &post.Title, &post.Content, &post.ImageURL)
+	if err != nil {
+        log.Println("Error fetching post: ", err)
+        return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error fetching post"})
+    }
+
+
+	return c.Render(http.StatusOK, "edit_post.html", post)
 }

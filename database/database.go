@@ -56,3 +56,22 @@ func SavePostToDB(post models.Post) error {
 	post.ID = int(id)
 	return nil
 }
+
+func UpdatePostInDB(post models.Post) error {
+    query := "UPDATE posts SET title = ?, content = ?, image_url = ? WHERE id = ?"
+
+    stmt, err := DB.Prepare(query)
+    if err != nil {
+        log.Println("Error preparing query:", err)
+        return err
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(post.Title, post.Content, post.ImageURL, post.ID)
+    if err != nil {
+        log.Println("Error executing query:", err)
+        return err
+    }
+
+    return nil
+}
