@@ -10,9 +10,15 @@
 <body>
     <div class="container">
         <div class="content">
-            <img src="{{ .ImageURL }}" alt="{{ .Title }}">
-            <h2>{{.Title}}</h2>
-            <p>{{.Content}}</p>
+            <img src="{{ .Post.ImageURL }}" alt="{{ .Title }}">
+                <h1>{{ .Post.Title }}</h1>
+                {{ if .isAuthenticated }}
+                    <a href="/posts/edit/{{ .Post.ID }}" class="edit-post-button">Edit</a>
+                    <form action="/posts/{{ .Post.ID }}/delete" method="POST" style="display: inline;">
+                        <button type="submit" class="delete-post-button">Delete</button>
+                    </form>
+                {{ end }}
+            <p>{{.Post.Content}}</p>
         </div>
         <div class="actions">
             <a href="/posts">Return</a>
@@ -21,5 +27,11 @@
     <footer>
         <p>&copy; Augblog</p>
     </footer>
+
+    {{ if .isAuthenticated }}
+        <script>console.log("User is authenticated")</script>
+    {{ else }}
+        <script>console.log("User is not authenticated")</script>
+    {{ end }}
 </body>
 </html>

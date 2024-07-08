@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"github.com/labstack/echo/v4"
+    "github.com/labstack/echo-contrib/session"
 	"blog/models"
 	"blog/database"
 	"log"
@@ -13,6 +14,8 @@ import (
 )
 
 func GetAllPosts(c echo.Context) error {
+    sess, _ := session.Get("session", c)
+    isAuthenticated, _ := sess.Values["isAuthenticated"].(bool)
     var posts []models.Post
 
     rows, err := database.DB.Query("SELECT id, title, content, image_url FROM posts")
@@ -43,7 +46,9 @@ func GetAllPosts(c echo.Context) error {
 
     err = c.Render(http.StatusOK, "all_posts.html", map[string]interface{}{
         "Posts": posts,
+        "isAuthenticated": isAuthenticated,
     })
+
     if err != nil {
         log.Println("Error rendering template: ", err)
         return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error rendering template"})
@@ -52,22 +57,26 @@ func GetAllPosts(c echo.Context) error {
     return nil
 }
 
-
 func GetPost(c echo.Context) error {
-	id := c.Param("id")
-	var post models.Post
+    sess, _ := session.Get("session", c)
+    isAuthenticated, _ := sess.Values["isAuthenticated"].(bool)
+    id := c.Param("id")
+    var post models.Post
 
-	row := database.DB.QueryRow("SELECT id, title, content, image_url FROM posts WHERE id = ?", id)
-	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.ImageURL)
+    row := database.DB.QueryRow("SELECT id, title, content, image_url FROM posts WHERE id = ?", id)
+    err := row.Scan(&post.ID, &post.Title, &post.Content, &post.ImageURL)
 
-	if err != nil {
-		log.Println("Error fetching post: ", err)
-		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Post not found."})
-	}
+    if err != nil {
+        log.Println("Error fetching post: ", err)
+        return c.JSON(http.StatusBadRequest, echo.Map{"error": "Post not found."})
+    }
 
-	log.Printf("Rendering post: %+v", post) // Log the post data to verify
+    log.Printf("Rendering post: %+v %+v", post, isAuthenticated)
 
-	return c.Render(http.StatusOK, "view_post.html", post)
+    return c.Render(http.StatusOK, "view_post.html", map[string]interface{}{
+        "Post": post,
+        "isAuthenticated": isAuthenticated,
+    })
 }
 
 func CreatePost(c echo.Context) error {
@@ -109,6 +118,7 @@ func CreatePost(c echo.Context) error {
 	}
 	return c.Redirect(http.StatusSeeOther, "/posts")
 }
+
 func UpdatePost(c echo.Context) error {
     idStr := c.Param("id")
     id, err := strconv.Atoi(idStr)
@@ -166,8 +176,6 @@ func UpdatePost(c echo.Context) error {
     return c.Redirect(http.StatusSeeOther, "/posts/" + idStr)
 }
 
-
-
 func DeletePost(c echo.Context) error {
 	id := c.Param("id")
 	statement, err := database.DB.Prepare("DELETE FROM posts WHERE id = ?")
@@ -210,4 +218,16 @@ func EditPostForm(c echo.Context) error {
 
 
 	return c.Render(http.StatusOK, "edit_post.html", post)
+}
+
+func Login(c echo.Context) error {
+	sess, _ := session.Get("session", c)
+	if auth, ok := sess.Values["isAuthenticated"].(bool); ok && auth {
+		return c.Redirect(http.StatusFound, "/posts")
+	}
+	return c.String(http.StatusUnauthorized, "Invalid username or password")
+}
+
+func ShowLoginForm(c echo.Context) error {
+    return c.Render(http.StatusOK, "login.html", nil)
 }
