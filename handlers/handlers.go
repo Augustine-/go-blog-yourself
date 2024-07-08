@@ -75,8 +75,6 @@ func GetPost(c echo.Context) error {
     // Mark content as safe HTML
     safeContent := template.HTML(post.Content)
 
-    log.Printf("Rendering post: %+v %+v", post, isAuthenticated)
-
     return c.Render(http.StatusOK, "view_post.html", map[string]interface{}{
         "Post":           post,
         "isAuthenticated": isAuthenticated,
