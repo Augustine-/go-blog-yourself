@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/new_post.css">
     <title>Edit Post</title>
+    <script src="/static/js/tinymce/js/tinymce/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+            selector: '#content',
+            menubar: false,
+            plugins: 'link image code',
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright | code'
+        });
+    </script>
 </head>
 <body>
     <div class="container">

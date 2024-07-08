@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post #{{.ID}}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/static/css/view_post.css">
+    <link rel="stylesheet" href="/static/css/view_post.css">
+    <title>Post #{{.Post.ID}}</title>
 </head>
 <body>
     <div class="container">
         <div class="content">
-            <img src="{{ .Post.ImageURL }}" alt="{{ .Title }}">
-                <h1>{{ .Post.Title }}</h1>
-                {{ if .isAuthenticated }}
-                    <a href="/posts/edit/{{ .Post.ID }}" class="edit-post-button">Edit</a>
-                    <form action="/posts/{{ .Post.ID }}/delete" method="POST" style="display: inline;">
-                        <button type="submit" class="delete-post-button">Delete</button>
-                    </form>
-                {{ end }}
-            <p>{{.Post.Content}}</p>
+            <img src="{{ .Post.ImageURL }}" alt="{{ .Post.Title }}">
+            <h1>{{ .Post.Title }}</h1>
+            {{ if .isAuthenticated }}
+                <a href="/posts/edit/{{ .Post.ID }}" class="edit-post-button">Edit</a>
+                <form action="/posts/{{ .Post.ID }}/delete" method="POST" style="display: inline;">
+                    <button type="submit" class="delete-post-button">Delete</button>
+                </form>
+            {{ end }}
+            <div class="post-content">{{ .SafeContent }}</div>
         </div>
         <div class="actions">
             <a href="/posts">Return</a>
@@ -27,11 +26,5 @@
     <footer>
         <p>&copy; Augblog</p>
     </footer>
-
-    {{ if .isAuthenticated }}
-        <script>console.log("User is authenticated")</script>
-    {{ else }}
-        <script>console.log("User is not authenticated")</script>
-    {{ end }}
 </body>
 </html>

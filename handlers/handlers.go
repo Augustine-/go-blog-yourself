@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+    "html/template"
 	"github.com/labstack/echo/v4"
     "github.com/labstack/echo-contrib/session"
 	"blog/models"
@@ -71,13 +72,18 @@ func GetPost(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, echo.Map{"error": "Post not found."})
     }
 
+    // Mark content as safe HTML
+    safeContent := template.HTML(post.Content)
+
     log.Printf("Rendering post: %+v %+v", post, isAuthenticated)
 
     return c.Render(http.StatusOK, "view_post.html", map[string]interface{}{
-        "Post": post,
+        "Post":           post,
         "isAuthenticated": isAuthenticated,
+        "SafeContent":    safeContent,
     })
 }
+
 
 func CreatePost(c echo.Context) error {
 	var newPost models.Post
