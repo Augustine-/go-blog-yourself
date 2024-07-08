@@ -19,7 +19,7 @@ func GetAllPosts(c echo.Context) error {
     isAuthenticated, _ := sess.Values["isAuthenticated"].(bool)
     var posts []models.Post
 
-    rows, err := database.DB.Query("SELECT id, title, content, image_url FROM posts")
+    rows, err := database.DB.Query("SELECT id, title, image_url FROM posts")
     if err != nil {
         log.Println("Error fetching posts: ", err)
         return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error fetching posts"})
@@ -28,7 +28,7 @@ func GetAllPosts(c echo.Context) error {
 
     for rows.Next() {
         var post models.Post
-        if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.ImageURL); err != nil {
+        if err := rows.Scan(&post.ID, &post.Title, &post.ImageURL); err != nil {
             log.Println("Error scanning post: ", err)
             return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Error scanning post"})
         }

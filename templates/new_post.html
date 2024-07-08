@@ -12,6 +12,12 @@
             menubar: false,
             plugins: 'link image code',
             toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright | code'
+            setup: function(editor) {
+                editor.on('submit', function(e) {
+                    var titleInput = document.getElementById('title');
+                    titleInput.value = stripHtmlTags(titleInput.value);
+                });
+            }
         });
     </script>
 </head>
